@@ -1,0 +1,48 @@
+USE EventManagementSystem;
+GO
+
+-- Insert User data
+INSERT INTO [User] (username, password, name, email, userType) VALUES
+('admin1', 'hashed_password_1', 'Admin User', 'admin@example.com', 'admin'),
+('organizer1', 'hashed_password_2', 'John Organizer', 'john@example.com', 'organizer'),
+('organizer2', 'hashed_password_3', 'Jane Organizer', 'jane@example.com', 'organizer'),
+('speaker1', 'hashed_password_4', 'Michael Speaker', 'michael@example.com', 'speaker'),
+('speaker2', 'hashed_password_5', 'Sarah Speaker', 'sarah@example.com', 'speaker'),
+('attendee1', 'hashed_password_6', 'Robert Attendee', 'robert@example.com', 'attendee'),
+('attendee2', 'hashed_password_7', 'Lisa Attendee', 'lisa@example.com', 'attendee'),
+('attendee3', 'hashed_password_8', 'David Attendee', 'david@example.com', 'attendee');
+GO
+
+-- Insert Event data
+INSERT INTO Event (name, description, startDate, endDate, location, organizerID) VALUES
+('Tech Conference 2025', 'Annual technology conference featuring the latest innovations', '2025-06-15', '2025-06-17', 'Convention Center, New York', 2),
+('Marketing Summit', 'Exploring digital marketing trends and strategies', '2025-07-10', '2025-07-12', 'Grand Hotel, Chicago', 3),
+('Data Science Workshop', 'Hands-on workshop on data analysis and machine learning', '2025-08-05', '2025-08-06', 'Tech Hub, San Francisco', 2);
+GO
+
+-- Insert Session data
+INSERT INTO Session (eventID, title, description, location, startTime, endTime, speakerID) VALUES
+(1, 'Future of AI', 'Discussing the impact of artificial intelligence on various industries', 'Room A101', '2025-06-15 10:00:00', '2025-06-15 11:30:00', 4),
+(1, 'Cloud Computing Trends', 'Latest developments in cloud technologies', 'Room B202', '2025-06-15 13:00:00', '2025-06-15 14:30:00', 5),
+(2, 'Social Media Strategies', 'Effective strategies for social media marketing', 'Main Hall', '2025-07-10 09:30:00', '2025-07-10 11:00:00', 4),
+(3, 'Python for Data Analysis', 'Introduction to data analysis using Python', 'Lab 1', '2025-08-05 10:00:00', '2025-08-05 12:00:00', 5);
+GO
+
+-- Insert Registration data
+INSERT INTO Registration (userID, eventID, registrationDate, registrationStatus) VALUES
+(6, 1, '2025-05-10 14:30:00', 'confirmed'),
+(7, 1, '2025-05-12 09:45:00', 'confirmed'),
+(8, 1, '2025-05-15 16:20:00', 'pending'),
+(6, 2, '2025-06-20 11:15:00', 'confirmed'),
+(7, 3, '2025-07-01 10:30:00', 'confirmed'),
+(8, 2, '2025-06-22 09:00:00', 'cancelled');
+GO
+
+-- Insert Notification data
+INSERT INTO Notification (name, title, message, createdAt, isRead, notificationType, userID) VALUES
+('Registration Confirmation', 'Your registration is confirmed', 'Thank you for registering for Tech Conference 2025', '2025-05-10 14:35:00', 1, 'registration', 6),
+('Session Reminder', 'Upcoming session reminder', 'Your session "Future of AI" starts in 1 hour', '2025-06-15 09:00:00', 0, 'reminder', 6),
+('Registration Confirmation', 'Your registration is confirmed', 'Thank you for registering for Marketing Summit', '2025-06-20 11:20:00', 1, 'registration', 6),
+('Speaker Update', 'Change in speaker', 'Please note that the speaker for "Cloud Computing Trends" has changed', '2025-06-10 13:45:00', 0, 'update', 7),
+('Workshop Materials', 'Materials now available', 'Workshop materials for Data Science Workshop are now available for download', '2025-07-25 08:30:00', 0, 'material', 7);
+GO

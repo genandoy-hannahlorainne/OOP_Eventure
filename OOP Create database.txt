@@ -1,0 +1,68 @@
+-- Create the database
+CREATE DATABASE EventManagementSystem;
+GO
+
+-- Switch to the database
+USE EventManagementSystem;
+GO
+
+-- Create User table
+CREATE TABLE [User] (
+    userID INT PRIMARY KEY IDENTITY(1,1),
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    userType VARCHAR(20) NOT NULL
+);
+
+-- Create Event table
+CREATE TABLE Event (
+    eventID INT PRIMARY KEY IDENTITY(1,1),
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    startDate DATE NOT NULL,
+    endDate DATE NOT NULL,
+    location VARCHAR(100),
+    organizerID INT NOT NULL,
+    FOREIGN KEY (organizerID) REFERENCES [User](userID)
+);
+
+-- Create Session table
+CREATE TABLE Session (
+    sessionID INT PRIMARY KEY IDENTITY(1,1),
+    eventID INT NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    location VARCHAR(100),
+    startTime DATETIME NOT NULL,
+    endTime DATETIME NOT NULL,
+    speakerID INT,
+    FOREIGN KEY (eventID) REFERENCES Event(eventID),
+    FOREIGN KEY (speakerID) REFERENCES [User](userID)
+);
+
+-- Create Registration table
+CREATE TABLE Registration (
+    registrationID INT PRIMARY KEY IDENTITY(1,1),
+    userID INT NOT NULL,
+    eventID INT NOT NULL,
+    registrationDate DATETIME NOT NULL,
+    registrationStatus VARCHAR(20) NOT NULL,
+    FOREIGN KEY (userID) REFERENCES [User](userID),
+    FOREIGN KEY (eventID) REFERENCES Event(eventID),
+    UNIQUE (userID, eventID)
+);
+
+-- Create Notification table
+CREATE TABLE Notification (
+    notificationID INT PRIMARY KEY IDENTITY(1,1),
+    name VARCHAR(100) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    createdAt DATETIME NOT NULL,
+    isRead BIT DEFAULT 0,
+    notificationType VARCHAR(50) NOT NULL,
+    userID INT NOT NULL,
+    FOREIGN KEY (userID) REFERENCES [User](userID)
+);
