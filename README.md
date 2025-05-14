@@ -1,1 +1,4 @@
 # OOP_Eventure
+
+EVENT MANAGEMENT SYSTEM OF DIT 2-1 
+@iska
