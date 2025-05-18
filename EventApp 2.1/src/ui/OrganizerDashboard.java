@@ -7,8 +7,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import models.Event;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class OrganizerDashboard {
     private int organizerID;
@@ -28,8 +32,9 @@ public class OrganizerDashboard {
         Button notificationsBtn = new Button("Notifications");
         Button createEventBtn = new Button("Create Event");
         Button profileBtn = new Button("Profile");
+        Button switchAccountBtn = new Button("Switch Account"); // <-- Added button
 
-        navBar.getChildren().addAll(eventsBtn, attendeesBtn, myEventsBtn, notificationsBtn, createEventBtn, profileBtn);
+        navBar.getChildren().addAll(eventsBtn, attendeesBtn, myEventsBtn, notificationsBtn, createEventBtn, profileBtn, switchAccountBtn);
 
         // --- Welcome and User Info ---
         Label welcomeLabel = new Label("Welcome, Organizer #" + organizerID);
@@ -38,7 +43,7 @@ public class OrganizerDashboard {
         VBox header = new VBox(5, welcomeLabel);
         header.setPadding(new Insets(10));
 
-     // --- Events Table ---
+        // --- Events Table ---
         TableView<Event> eventsTable = new TableView<>();
 
         TableColumn<Event, Integer> idCol = new TableColumn<>("Event ID");
@@ -75,17 +80,17 @@ public class OrganizerDashboard {
             e.printStackTrace();
         }
 
-        // --- Notifications Panel (Right Column Top) ---
+        // --- Notifications Panel ---
         VBox notificationsBox = new VBox(10);
         notificationsBox.setPadding(new Insets(10));
         notificationsBox.setStyle("-fx-border-color: gray; -fx-border-width: 1;");
         Label notifLabel = new Label("Notifications");
         notifLabel.setStyle("-fx-font-weight: bold;");
         ListView<String> notificationsList = new ListView<>();
-        notificationsList.getItems().addAll("No new notifications.");
+        notificationsList.getItems().add("No new notifications.");
         notificationsBox.getChildren().addAll(notifLabel, notificationsList);
 
-        // --- Analytics Panel (Right Column Bottom) ---
+        // --- Analytics Panel ---
         VBox analyticsBox = new VBox(10);
         analyticsBox.setPadding(new Insets(10));
         analyticsBox.setStyle("-fx-border-color: gray; -fx-border-width: 1;");
@@ -140,7 +145,7 @@ public class OrganizerDashboard {
             EventListPage myEventsPage = new EventListPage(true); // Show only my events
             myEventsPage.show(new Stage(), organizerID);
         });
-        
+
         eventsBtn.setOnAction(e -> {
             EventListPage eventsPage = new EventListPage(false); // Show all events
             eventsPage.show(new Stage(), organizerID);
@@ -151,26 +156,49 @@ public class OrganizerDashboard {
             profilePage.show(new Stage(), organizerID);
         });
 
-        // TODO: notificationsBtn action
-    }
-    
-    public static class Event {
-        private int eventID;
-        private String eventName;
-        private String startDate;
-        private String endDate;
+        notificationsBtn.setOnAction(e -> {
+            notificationsList.getItems().clear(); // Clear previous items
 
-        public Event(int eventID, String eventName, String startDate, String endDate) {
-            this.eventID = eventID;
-            this.eventName = eventName;
-            this.startDate = startDate;
-            this.endDate = endDate;
-        }
+            try (Connection conn = DBConnection.getConnection()) {
+                String sql = """
+                    SELECT title, message, createdAt, notificationType
+                    FROM Notification
+                    WHERE userID = ? AND notificationType = 'Organizer'
+                    ORDER BY createdAt DESC
+                """;
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setInt(1, organizerID); // userID here refers to the organizer
+                ResultSet rs = stmt.executeQuery();
 
-        public int getEventID() { return eventID; }
-        public String getEventName() { return eventName; }
-        public String getStartDate() { return startDate; }
-        public String getEndDate() { return endDate; }
+                boolean hasNotif = false;
+                while (rs.next()) {
+                    hasNotif = true;
+                    String title = rs.getString("title");
+                    String message = rs.getString("message");
+                    String timestamp = rs.getString("createdAt");
+                    String type = rs.getString("notificationType");
+
+                    notificationsList.getItems().add("[" + timestamp + "] " + title + ": " + message);
+                }
+
+                if (!hasNotif) {
+                    notificationsList.getItems().add("No new notifications.");
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                notificationsList.getItems().add("Error loading notifications.");
+            }
+        });
+
+        // --- Switch Account button action ---
+        switchAccountBtn.setOnAction(e -> {
+            // Close current dashboard
+            stage.close();
+
+            // Open login page by creating new stage and passing it to constructor
+            Stage loginStage = new Stage();
+            new LoginPage(loginStage);
+        });
     }
 
     public void show(Stage stage) {
